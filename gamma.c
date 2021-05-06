@@ -1,12 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
-
-int duplicate(char* program, int fd);  
+#include "gamma.h"
 
 int main(int argc, char* argv[])    //На вход подается две программы и выдается результат их xor-я
 {
@@ -19,40 +11,54 @@ int main(int argc, char* argv[])    //На вход подается две пр
     int children[2];
     pipe(pipes[0]);
     pipe(pipes[1]);
-    int output = open(argv[3], O_CREAT | O_WRONLY);
-    children[0] = dublicate(argv[1], stream[0][1]);
-    children[1] = dublicate(argv[2], stream[1][1]);
+    int output = open(argv[3], O_CREAT | O_WRONLY, PERM);
+    children[0] = duplicate(argv[1], pipes[0]);
+    children[1] = duplicate(argv[2], pipes[1]);
     char chars[2];
     while (read(pipes[0][0], chars, 1) != 0 && read(pipes[1][0], chars+1, 1) != 0)
     {
         char temp = chars[0] ^ chars[1];
         write(output, &temp, 1);
     }
+    printf("Работа программы окончена.\n");
     close(output);
-    close(stream[0][0]);
-    close(stream[1][0]);
-    
+    close(pipes[0][0]);
+    close(pipes[1][0]);
+    return 0;
 }
 
-int duplicate(char* program, int fd)
+int duplicate(char* program, int* _pipe)
 {
-    int child = fork();
-	switch (child)	
+    char* command;
+    char** arg_vec = string_parser(program, "\n ");
+    command = arg_vec[0];
+    char path[PATH_MAX];
+    if (getcwd(path, PATH_MAX) == NULL)	{
+		perror("Getting path error: ");
+		return errno;
+	}
+    arg_vec[0] = path;
+    
+    if (command == NULL)
+        return -1;
+    int child;
+	switch (child = fork())	
     {
         case 0:	//Потомок
             close(STDOUT_FILENO);
-            dup(fd);
+            dup(_pipe[1]);
+            close(_pipe[0]);
             if (execvp(command, arg_vec) == -1)	
             {
                 perror("Ошибка открытия: ");
                 exit(errno);
             }
-            return;
+            return -1;
         case -1:	//Ошибка при раздвоении
             perror("Ошибка раздвоения: ");
             break;
         default:	//Предок
-            close(fd);
+            close(_pipe[1]);
             break;
 	}
     return child;

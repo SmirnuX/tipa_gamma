@@ -1,2 +1,2 @@
 all:
-	gcc gamma.c -o tgamma
+	gcc gamma.c string_parser.c -o tgamma
