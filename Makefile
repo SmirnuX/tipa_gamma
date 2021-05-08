@@ -1,4 +1,4 @@
 all:
-	gcc gamma.c string_parser.c -o tgamma
+	gcc src/gamma.c src/string_parser.c -o tgamma
 sanitized:
-	gcc gamma.c string_parser.c -o tgamma -fsanitize=address
+	gcc src/gamma.c src/string_parser.c -o tgamma -fsanitize=address

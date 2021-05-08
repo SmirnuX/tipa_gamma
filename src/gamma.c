@@ -30,17 +30,16 @@ int main(int argc, char* argv[])
     char chars[2];
     int count[2];
     int total = 0;
-    do
+    count[0] = read(pipes[0][0], chars, 1);
+    count[1] = read(pipes[1][0], chars+1, 1);
+    while (count[0] != 0 && count[1] != 0)
     {
-        count[0] = read(pipes[0][0], chars, 1);
-        count[1] = read(pipes[1][0], chars+1, 1);
+        
         if (count[0] < 0 || count[1] < 0)
         {
             perror("Ошибка чтения из труб: ");
             break;
         }
-        if (chars[0] == 0 || chars[1] == 0)
-            break;
         char temp = chars[0] ^ chars[1];
         if (write(output, &temp, 1) != 1)
         {
@@ -49,8 +48,9 @@ int main(int argc, char* argv[])
         }
         else
             total++;
+        count[0] = read(pipes[0][0], chars, 1);
+        count[1] = read(pipes[1][0], chars+1, 1);
     }
-    while (count[0] != 0 && count[1] != 0);
     printf("Работа программы окончена, записано %i байт.\n", total);
     close(output);
     close(pipes[0][0]);
