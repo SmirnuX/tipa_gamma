@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: CPOL-1.02
 #include "gamma.h"
+//Код взят с https://github.com/SmirnuX/tipa_terminal
 //Разделение входной строки на аргументы, и вспомогательные функции для этого
 char *new_str_copy(char *source, int beginning, int end)
 {
