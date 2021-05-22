@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
         close_pipes((int**)pipes);
         return errno;
     }
-    int output = open(argv[3], O_CREAT | O_WRONLY, PERM);
+    int output = open(argv[3], O_CREAT | O_WRONLY | O_TRUNC, PERM);
     if (output < 0)
     {
         perror("Ошибка создания выходного файла: ");
